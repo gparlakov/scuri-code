@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+import { main as schematics } from "@angular-devkit/schematics-cli/bin/schematics";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -18,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
     const a = vscode.window.activeTextEditor;
     if (a !== undefined) {
       // Display a message box to the user
-      vscode.window.showInformationMessage(a.document.fileName);
+      runScuriSchematic(a.document.fileName);
     }
   });
 
@@ -28,6 +29,17 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {}
 
-function runScuriSchematic() {
-
+function runScuriSchematic(activeFileName: string) {
+  schematics({
+    args: [
+      "scuri:spec",
+      "--name",
+      activeFileName,
+      "--workingDirectory",
+      "c:\\Users\\gparl\\projects\\scuri-code"
+    ]
+  })
+    .then()
+    .catch()
+    .finally();
 }
