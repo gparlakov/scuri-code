@@ -1,49 +1,55 @@
 {
-	"name": "scuri-code",
-	"displayName": "Scuri Code",
-	"description": "Run Scuri from VS Code",
-	"version": "0.0.1",
-	"engines": {
-		"vscode": "^1.36.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:scuri:generate"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "scuri:generate",
-				"title": "Scuri Generate"
-			}
-		]
-	},
-	"scripts": {
-		"vscode:prepublish": "webpack --mode production",
-		"compile": "webpack --mode none",
-		"watch": "webpack --mode none --watch",
-		"test-compile": "tsc -p ./",
-		"pretest": "npm run compile",
-		"test": "node ./out/test/runTest.js"
-	},
-	"devDependencies": {
-		"@angular-devkit/schematics-cli": "^0.801.0",
-		"@types/glob": "^7.1.1",
-		"@types/mocha": "^5.2.6",
-		"@types/node": "^10.12.21",
-		"@types/vscode": "^1.36.0",
-		"glob": "^7.1.4",
-		"mocha": "^6.1.4",
-		"scuri": "^0.3.1",
-		"ts-loader": "^6.0.4",
-		"tslint": "^5.12.1",
-		"typescript": "^3.3.1",
-		"vscode-test": "^1.0.0-next.0",
-		"webpack": "^4.35.2",
-		"webpack-cli": "^3.3.5"
-	},
-	"publisher": "gparlakov"
+  "name": "scuri-code",
+  "displayName": "Scuri Code",
+  "description": "Run Scuri from VS Code",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.36.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:scuri:generate"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "scuri:generate",
+        "title": "Scuri Generate"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "webpack --mode production",
+    "compile": "webpack --mode none",
+    "watch": "webpack --mode none --watch",
+    "test-compile": "tsc -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js"
+  },
+  "dependencies": {
+    "scuri": "^0.3.1"
+  },
+  "devDependencies": {
+    "@angular-devkit/schematics-cli": "^0.801.0",
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^10.12.21",
+    "@types/vscode": "^1.36.0",
+    "@types/webpack": "4.1.4",
+    "glob": "^7.1.4",
+    "mocha": "^6.1.4",
+    "ts-loader": "^6.0.4",
+    "tslint": "^5.12.1",
+    "typescript": "^3.3.1",
+    "vscode-test": "^1.0.0-next.0",
+    "webpack": "^4.35.2",
+    "webpack-cli": "^3.3.5"
+  },
+  "publisher": "gparlakov",
+  "prettier": {
+    "printWidth": 110
+  }
 }
