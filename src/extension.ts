@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { main as schematics } from "@angular-devkit/schematics-cli/bin/schematics";
+import { ProcessOutput } from "@angular-devkit/core/node";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -42,16 +43,41 @@ export function deactivate() {}
 function runScuriSchematic(activeFileName: string, root: string, channel: vscode.OutputChannel) {
   channel.appendLine(`Working on ${activeFileName} in root: ${root}`);
   channel.show(true);
-  // schematics({
-  //   args: [
-  //     "scuri:spec",
-  //     "--name",
-  //     activeFileName,
-  //     "--workingDirectory",
-  //     "c:\\Users\\gparl\\projects\\scuri-code"
-  //   ]
-  // })
-  //   .then()
-  //   .catch()
-  //   .finally();
+
+  const output: ProcessOutput = {
+    write(buffer) {
+      try {
+        if (Buffer.isBuffer(buffer)) {
+          channel.appendLine(buffer.toString("utf8"));
+        } else {
+          channel.appendLine(buffer);
+        }
+        return true;
+      } catch (e) {
+        channel.appendLine(
+          `Error while logging out. ${e && e.message ? e.message : ""} ${e && e.stack ? "at " + e.stack : ""}`
+        );
+        return false;
+      }
+    }
+  };
+
+  schematics({
+    args: ["scuri:spec", "--name", activeFileName, "--workingDirectory", root],
+    stdout: output,
+    stderr: output
+  })
+    .then(r => {
+      if (r === 0) {
+        channel.appendLine("Success");
+      } else {
+        channel.appendLine("Failure. Process returned non-zero exit code:" + r);
+      }
+    })
+    .catch(e =>
+      channel.appendLine(
+        `Error happened ${e && e.message ? e.message : ""} ${e && e.stack ? "at " + e.stack : ""}`
+      )
+    )
+    .finally();
 }
