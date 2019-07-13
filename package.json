@@ -60,6 +60,10 @@
     "webpack-cli": "^3.3.5"
   },
   "publisher": "gparlakov",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/gparlakov/scuri-code"
+  },
   "prettier": {
     "printWidth": 110
   }
