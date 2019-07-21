@@ -37,7 +37,7 @@
       }
     ]
   },
-  "icon": "./scuri-logo.png",
+  "icon": "images/logo.png",
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
     "compile": "webpack --mode none",
