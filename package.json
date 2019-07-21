@@ -1,8 +1,9 @@
 {
   "name": "scuri-code",
+  "version": "0.1.1",
   "displayName": "Scuri Code",
   "description": "Run Scuri from VS Code",
-  "version": "0.1.0",
+  "publisher": "gparlakov",
   "engines": {
     "vscode": "^1.36.0"
   },
@@ -36,6 +37,7 @@
       }
     ]
   },
+  "icon": "./scuri-logo.png",
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
     "compile": "webpack --mode none",
@@ -59,7 +61,6 @@
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5"
   },
-  "publisher": "gparlakov",
   "repository": {
     "type": "github",
     "url": "https://github.com/gparlakov/scuri-code"
