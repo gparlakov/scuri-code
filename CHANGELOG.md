@@ -6,4 +6,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
-- Initial release
+0.1.2 - Install @angular-devkit/schematics-cli and `scuri` as part of the extension's installation - so it's good and ready to go as soon as installed
+
+0.1.1 - Initial release

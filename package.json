@@ -1,6 +1,6 @@
 {
   "name": "scuri-code",
-  "version": "0.1.1",
+  "version": "0.1.2-pre-1",
   "displayName": "Scuri Code",
   "description": "Run Scuri from VS Code",
   "publisher": "gparlakov",
@@ -67,5 +67,9 @@
   },
   "prettier": {
     "printWidth": 110
+  },
+  "dependencies": {
+    "@angular-devkit/schematics-cli": "^0.801.3",
+    "scuri": "^0.6.1"
   }
 }
