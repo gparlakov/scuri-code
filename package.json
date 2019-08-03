@@ -1,6 +1,6 @@
 {
   "name": "scuri-code",
-  "version": "0.1.2-pre-1",
+  "version": "1.0.0",
   "displayName": "Scuri Code",
   "description": "Run Scuri from VS Code",
   "publisher": "gparlakov",
@@ -21,19 +21,19 @@
     "commands": [
       {
         "command": "scuri:generate",
-        "title": "Scuri Generate"
+        "title": "SCuri Create Spec"
       },
       {
         "command": "scuri:update",
-        "title": "Scuri Update"
+        "title": "SCuri Update Spec"
       },
       {
         "command": "scuri:overwrite",
-        "title": "Scuri Generate (overwrite)"
+        "title": "SCuri Create Spec (overwrite)"
       },
       {
         "command": "scuri:install-deps",
-        "title": "Scuri Install Dependencies"
+        "title": "SCuri Install Dependencies"
       }
     ]
   },
@@ -67,9 +67,5 @@
   },
   "prettier": {
     "printWidth": 110
-  },
-  "dependencies": {
-    "@angular-devkit/schematics-cli": "^0.801.3",
-    "scuri": "^0.6.1"
   }
 }
