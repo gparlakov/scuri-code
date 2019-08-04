@@ -2,8 +2,14 @@
 
 All notable changes to the "scuri-code" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## Versions
 
-## [Unreleased]
+1.0.0 - Auto Deps Install
+ 1. Install dependencies globally once
+    - on any command if deps not installed
+    - on Scuri Install Deps command - every time (but not multiple simultaneous installs)
+ 2. Also update strings to match the name SCuri
+ 3. Show nice progress bar while installing deps as that takes time
+ 4. Attempt at showing the progress on the commands themselves (not working on debug...)
 
-- Initial release
+0.1.1 - Initial release

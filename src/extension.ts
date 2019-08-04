@@ -1,137 +1,265 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from "vscode";
-import * as c from "child_process";
-import { EOL } from "os";
 
+import * as c from "child_process";
+import * as fs from "fs";
+import { EOL } from "os";
+import { join, relative } from "path";
+import { promisify } from "util";
+import { commands, ExtensionContext, OutputChannel, ProgressLocation, window, workspace } from "vscode";
+
+const exists = promisify(fs.exists);
+const mkdir = promisify(fs.mkdir);
+
+let scuriPath: string;
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  const channel = vscode.window.createOutputChannel("SCURI");
-  channel.appendLine('Congratulations, your extension "scuri-code" is now active!');
+  const channel = window.createOutputChannel("SCuri");
+  // init the path
+  scuriPath = join(context.globalStoragePath, "deps");
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-
-  const generateCommand = vscode.commands.registerCommand(
+  // commands
+  const generateCommand = commands.registerCommand(
     "scuri:generate",
-    scuriCommand(channel, runScuriSchematic)
+    scuriCommand(context, channel, runScuriSchematic)
   );
   context.subscriptions.push(generateCommand);
 
-  const overwriteCommand = vscode.commands.registerCommand(
+  const overwriteCommand = commands.registerCommand(
     "scuri:update",
-    scuriCommand(channel, runScuriSchematic, "--update")
+    scuriCommand(context, channel, runScuriSchematic, "--update")
   );
   context.subscriptions.push(overwriteCommand);
 
-  const updateCommand = vscode.commands.registerCommand(
+  const updateCommand = commands.registerCommand(
     "scuri:overwrite",
-    scuriCommand(channel, runScuriSchematic, "--force")
+    scuriCommand(context, channel, runScuriSchematic, "--force")
   );
   context.subscriptions.push(updateCommand);
 
-  const commandInstallDependencies = vscode.commands.registerCommand(
-    "scuri:install-deps",
-    scuriCommand(channel, installDeps)
+  const commandInstallDependencies = commands.registerCommand("scuri:install-deps", () =>
+    installDeps(channel, context)
   );
   context.subscriptions.push(commandInstallDependencies);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+  // deps are installed in the extension folder managed by vscode - it should take care of deleting them...
+}
 
 function scuriCommand(
-  channel: vscode.OutputChannel,
-  command: (file: string, root: string, channel: vscode.OutputChannel, options?: string) => void,
+  context: ExtensionContext,
+  channel: OutputChannel,
+  command: (
+    file: string,
+    root: string,
+    channel: OutputChannel,
+    options?: string,
+    context?: ExtensionContext
+  ) => void,
   options?: string
 ) {
   return () => {
-    // The code you place here will be executed every time your command is executed
-
-    const a = vscode.window.activeTextEditor;
-    if (a !== undefined) {
-      const root = vscode.workspace.getWorkspaceFolder(a.document.uri);
-      if (root === undefined) {
-        vscode.window.showErrorMessage(
-          "There needs to be an open folder with an angular app inside it for SCURI to generate/update specs."
-        );
-      } else {
-        command(vscode.workspace.asRelativePath(a.document.fileName), root.uri.fsPath, channel, options);
-      }
-    } else {
-      vscode.window.showErrorMessage("A file needs to be opened for SCURI to generate/update specs for.");
-    }
+    window.withProgress({ location: ProgressLocation.Window, title: "Running SCuri command" }, (p, t) => {
+      return areDepsInstalled()
+        .then(installed =>
+          !installed
+            ? installDeps(channel, context).then(
+                () => "",
+                v => {
+                  throw v;
+                }
+              )
+            : ""
+        )
+        .then(() => {
+          const a = window.activeTextEditor;
+          if (a !== undefined) {
+            const root = workspace.getWorkspaceFolder(a.document.uri);
+            if (root === undefined) {
+              window.showErrorMessage(
+                "There needs to be an open folder with an angular app inside it for SCuri to create/update specs."
+              );
+            } else {
+              options = options || '';
+              // need to add --debug false as the schematics engine assumes debug true when specifying the schematic by folder vs package name
+              options += " --debug false";
+              command(
+                workspace.asRelativePath(a.document.fileName),
+                root.uri.fsPath,
+                channel,
+                options,
+                context
+              );
+            }
+          } else {
+            window.showErrorMessage("A file needs to be opened for SCuri to create/update specs for.");
+          }
+        });
+    });
   };
 }
 
-function runScuriSchematic(
-  activeFileName: string,
-  root: string,
-  channel: vscode.OutputChannel,
-  options?: string
-) {
-  channel.appendLine(`${root}>npx schematics scuri:spec --name ${activeFileName} ${options}`);
-  channel.show();
+function runScuriSchematic(activeFileName: string, root: string, channel: OutputChannel, options?: string) {
+  const schematicsExecutable = join(scuriPath, "node_modules", ".bin", "schematics");
+  // needs to be relative because c: will trip the schematics engine to take everything after the colon and treat it as the name of the schematics - think scuri:spec -> c:\programfiles
+  const schematicsRelativePath = relative(
+    root,
+    join(scuriPath, "node_modules", "scuri", "src", "collection.json")
+  );
 
-  c.exec(`npx schematics scuri:spec --name ${activeFileName} ${options}`, { cwd: root }, (e, out, err) =>
-    execOutputHandler(e, out, err, channel)
+  channel.appendLine(
+    `${root}>${schematicsExecutable} ${schematicsRelativePath}:spec --name ${activeFileName} ${
+      options ? options : ""
+    }`
+  );
+  channel.show();
+  c.exec(
+    `${schematicsExecutable} ${schematicsRelativePath}:spec --name ${activeFileName} ${
+      options ? options : ""
+    }`,
+    { cwd: root },
+    // child process output handler
+    (e, out, err) => {
+      if (e !== null) {
+        if (e.message && e.message.match(/[Cc]ould not find module.*scuri/)) {
+          const message =
+            "SCuri is required to run SCuri Create Spec command. Run 'SCuri Install Dependencies' from VS Code command (F1 / Cmd + P)";
+          window.showErrorMessage(message);
+          channel.appendLine(message);
+        } else if (e.message && e.message.match(/Cannot find module.*schematics.js'/)) {
+          const message =
+            "Schematics cli is required to run SCuri Create Spec. Run 'SCuri Install Dependencies' from VS Code command (F1 / Cmd + P)";
+
+          window.showErrorMessage(message);
+          channel.appendLine(message);
+        } else if (
+          e.message.match(
+            /The spec file already exists. Please specify --update or -u if you want to update the spec file./
+          ) ||
+          e.message.match(/ERROR!.*already exists\./)
+        ) {
+          const message =
+            "The spec file already exists. Please use SCuri Update if you want to update the spec file. Or SCuri Create Spec (overwrite) to overwrite the existing spec file with a fresh spec.";
+          window.showErrorMessage(message);
+          channel.appendLine(message);
+        } else {
+          channel.appendLine(e.message);
+
+          console.log(
+            `---------------- Could not run ${e.cmd} ${EOL}------ with error: ${e.message} ${EOL}${
+              e.stack && !e.message.includes(e.stack) ? "------  with stack" + e.stack : ""
+            }`
+          );
+        }
+      } else {
+        // tslint:disable-next-line: triple-equals
+        if (err != null && err.length > 0) {
+          channel.appendLine(err + " (ERROR LINE)");
+        }
+        // tslint:disable-next-line: triple-equals
+        if (out != null && out.length > 0) {
+          channel.appendLine(out);
+        }
+      }
+    }
   );
 }
 
-function installDeps(_: string, root: string, channel: vscode.OutputChannel) {
-  channel.appendLine(`Running 'npm install --save-dev @angular-devkit/schematics-cli scuri in ${root}`);
-  channel.show();
-
-  c.exec("npm install --save-dev @angular-devkit/schematics-cli scuri", { cwd: root }, (e, out, err) =>
-    execOutputHandler(e, out, err, channel)
-  );
-}
-
-function execOutputHandler(
-  e: c.ExecException | null,
-  out: string,
-  err: string,
-  channel: vscode.OutputChannel
-) {
-  if (e !== null) {
-    if (e.message && e.message.match(/[Cc]ould not find module.*scuri/)) {
-      const message =
-        "Scuri is required to run Scuri generate command. Run 'Scuri install dependencies' or Install scuri locally - `npm install --save-dev scuri`";
-      vscode.window.showErrorMessage(message);
-      channel.appendLine(message);
-    } else if (e.message && e.message.match(/Cannot find module.*schematics.js'/)) {
-      const message =
-        "Schematics cli is required to run Scuri generate command. Run 'Scuri install dependencies' or Install Schematics locally - `npm install --save-dev @angular-devkit/schematics-cli`";
-
-      vscode.window.showErrorMessage(message);
-      channel.appendLine(message);
-    } else if (
-      e.message.match(
-        /The spec file already exists. Please specify --update or -u if you want to update the spec file./
-      )
-    ) {
-      vscode.window.showErrorMessage(
-        "The spec file already exists. Please use Scuri Update if you want to update the spec file. Or Scuri Generate (overwrite) to overwrite the existing spec file with a fresh spec."
-      );
-    } else {
-      channel.appendLine(
-        `---------------- Could not run ${e.cmd} ${EOL}------ with error: ${e.message} ${EOL}${
-          e.stack && !e.message.includes(e.stack) ? "------  with stack" + e.stack : ""
-        }`
-      );
-    }
-  } else {
-    // tslint:disable-next-line: triple-equals
-    if (err != null && err.length > 0) {
-      channel.appendLine("ERROR: " + err);
-    }
-    // tslint:disable-next-line: triple-equals
-    if (out != null && out.length > 0) {
-      channel.appendLine("CONSOLE: " + out);
-    }
+function installDeps(channel: OutputChannel, context?: ExtensionContext) {
+  if (context === null || context === undefined) {
+    throw new Error("Context required");
   }
+
+  // check the folder
+  return window.withProgress(
+    {
+      location: ProgressLocation.Notification,
+      title: "Installing deps",
+      cancellable: true
+    },
+    (progress, token) => {
+      token.onCancellationRequested(() => {
+        console.log("User canceled the long running operation");
+        progress.report({ message: "Canceled!" });
+      });
+
+      return (
+        // check/create if missing globalStorage/gparlakov.scuri-code
+        mkDirIfNotExists(context.globalStoragePath)
+          // check create if missing globalStorage/gparlakov.scuri-code/deps
+          .then(() => mkDirIfNotExists(scuriPath))
+          // do not check if deps are installed because we might need to re-install (update!)
+          .then(() => {
+            return new Promise((res, rej) => {
+              channel.show();
+              const key_installing = "scuri_deps_installing";
+              if (context.globalState.get(key_installing)) {
+                const message = `Trying to install dependencies multiple times simultaneously.`;
+                console.error(message);
+                rej(message);
+              } else {
+                context.globalState.update(key_installing, true);
+              }
+
+              channel.appendLine(
+                "Start installing deps. Could take a couple of minutes - doing `npm install scuri @angular-devkit/schematics-cli`"
+              );
+
+              const proc = c.exec(
+                "npm i -S scuri @angular-devkit/schematics-cli && echo installed > success.txt",
+                {
+                  cwd: scuriPath,
+                  maxBuffer: 1000
+                }
+              );
+
+              proc.stdout.on("data", d => {
+                console.log("stdout:", d);
+              });
+              proc.stderr.on("data", e => {
+                console.log("stderr:", e);
+              });
+
+              proc.on("exit", code => {
+                console.log("exit with", code);
+                // finished with installing deps
+                context.globalState.update(key_installing, undefined);
+                if (code === 0) {
+                  channel.appendLine(`Successfully installed SCuri dependencies in ${scuriPath}`);
+                  res("Done");
+                } else {
+                  channel.appendLine("Failure installing deps");
+                  rej("Error!");
+                }
+              });
+            });
+          })
+          .catch(e => {
+            channel.appendLine(e.message);
+            console.error(`${e.message} ${e.stack}`);
+          })
+      );
+    }
+  );
+}
+
+function areDepsInstalled() {
+  return exists(join(scuriPath, "success.txt"));
+}
+
+function mkDirIfNotExists(path: string) {
+  return exists(path).then(e => {
+    if (!e) {
+      console.log(`${path} DOES NOT exist. Creating!`);
+      return mkdir(path);
+    } else {
+      console.log(`${path} exist`);
+      return undefined;
+    }
+  });
 }
