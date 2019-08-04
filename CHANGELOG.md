@@ -4,6 +4,8 @@ All notable changes to the "scuri-code" extension will be documented in this fil
 
 ## Versions
 
+1.0.1 Fix [lodash vulnerability](https://github.com/lodash/lodash/pull/4336)
+
 1.0.0 - Auto Deps Install
  1. Install dependencies globally once
     - on any command if deps not installed
