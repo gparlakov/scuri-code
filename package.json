@@ -1,6 +1,6 @@
 {
   "name": "scuri-code",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Scuri Code",
   "description": "Run Scuri from VS Code",
   "publisher": "gparlakov",
@@ -53,6 +53,7 @@
     "@types/vscode": "^1.36.0",
     "@types/webpack": "4.1.4",
     "glob": "^7.1.4",
+    "lodash": "^4.17.15",
     "mocha": "^6.1.4",
     "ts-loader": "^6.0.4",
     "tslint": "^5.12.1",
