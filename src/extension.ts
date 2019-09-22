@@ -6,7 +6,14 @@ import * as fs from "fs";
 import { EOL } from "os";
 import { join, relative } from "path";
 import { promisify } from "util";
-import { commands, ExtensionContext, OutputChannel, ProgressLocation, window, workspace } from "vscode";
+import {
+  commands,
+  ExtensionContext,
+  OutputChannel,
+  ProgressLocation,
+  window,
+  workspace
+} from "vscode";
 
 const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
@@ -44,6 +51,10 @@ export function activate(context: ExtensionContext) {
     installDeps(channel, context)
   );
   context.subscriptions.push(commandInstallDependencies);
+
+  context.subscriptions.push(
+    commands.registerCommand("scuri:auto-spy", () => takeAutospyArguments(context, channel))
+  );
 }
 
 // this method is called when your extension is deactivated
@@ -54,14 +65,9 @@ export function deactivate() {
 function scuriCommand(
   context: ExtensionContext,
   channel: OutputChannel,
-  command: (
-    file: string,
-    root: string,
-    channel: OutputChannel,
-    options?: string,
-    context?: ExtensionContext
-  ) => void,
-  options?: string
+  command: typeof runScuriSchematic,
+  options?: string,
+  schematic: "spec" | "autospy" = "spec"
 ) {
   return () => {
     window.withProgress({ location: ProgressLocation.Window, title: "Running SCuri command" }, (p, t) => {
@@ -85,7 +91,7 @@ function scuriCommand(
                 "There needs to be an open folder with an angular app inside it for SCuri to create/update specs."
               );
             } else {
-              options = options || '';
+              options = options || "";
               // need to add --debug false as the schematics engine assumes debug true when specifying the schematic by folder vs package name
               options += " --debug false";
               command(
@@ -93,7 +99,7 @@ function scuriCommand(
                 root.uri.fsPath,
                 channel,
                 options,
-                context
+                schematic
               );
             }
           } else {
@@ -104,7 +110,13 @@ function scuriCommand(
   };
 }
 
-function runScuriSchematic(activeFileName: string, root: string, channel: OutputChannel, options?: string) {
+function runScuriSchematic(
+  activeFileName: string,
+  root: string,
+  channel: OutputChannel,
+  options?: string,
+  schematic: "spec" | "autospy" = "spec"
+) {
   const schematicsExecutable = join(scuriPath, "node_modules", ".bin", "schematics");
   // needs to be relative because c: will trip the schematics engine to take everything after the colon and treat it as the name of the schematics - think scuri:spec -> c:\programfiles
   const schematicsRelativePath = relative(
@@ -113,13 +125,13 @@ function runScuriSchematic(activeFileName: string, root: string, channel: Output
   );
 
   channel.appendLine(
-    `${root}>${schematicsExecutable} ${schematicsRelativePath}:spec --name ${activeFileName} ${
+    `${root}>${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name ${activeFileName} ${
       options ? options : ""
     }`
   );
 
   c.exec(
-    `${schematicsExecutable} ${schematicsRelativePath}:spec --name ${activeFileName} ${
+    `${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name ${activeFileName} ${
       options ? options : ""
     }`,
     { cwd: root },
@@ -247,6 +259,60 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
   );
 }
 
+function takeAutospyArguments(context: ExtensionContext, channel: OutputChannel) {
+  const quickPick = window.createQuickPick();
+  quickPick.items = [
+    { label: "jest", description: "Create auto-spy.ts for jest" },
+    { label: "jasmine", description: "Create auto-spy.ts for jasmine" },
+    {
+      label: "jest legacy ts",
+      description: "Create auto-spy.ts for jest and ts < 2.8 * no conditional types",
+      detail: "Choose this option if you are using TypeScript version less than 2.8"
+    },
+    {
+      label: "jasmine legacy ts",
+      description: "Create auto-spy.ts for jasmine and ts < 2.8 * no conditional types",
+      detail: "Choose this option if you are using TypeScript version less than 2.8"
+    }
+  ];
+  let choice: "jest" | "jasmine" | "jest legacy ts" | "jasmine legacy ts";
+  quickPick.onDidChangeSelection(selection => {
+    if (selection[0]) {
+      choice = selection[0].label as "jest" | "jasmine" | "jest legacy ts" | "jasmine legacy ts";
+    }
+  });
+  quickPick.onDidAccept(() => {
+    if (Boolean(choice)) {
+      quickPick.hide();
+
+      let options: string;
+      switch (choice) {
+        case "jest":
+          options = "--for jest";
+          break;
+        case "jasmine":
+          options = "--for jasmine";
+          break;
+        case "jest legacy ts":
+          options = "--for jest --legacy";
+          break;
+        case "jasmine legacy ts":
+          options = "--for jasmine --legacy";
+          break;
+        default:
+          warnMeCompileTimeIfIMissAValue(choice);
+          options = "--for jest";
+          break;
+      }
+
+      // create the command and run it immediately
+      scuriCommand(context, channel, runScuriSchematic, options, "autospy")();
+    }
+  });
+  quickPick.onDidHide(() => quickPick.dispose());
+  quickPick.show();
+}
+
 function areDepsInstalled() {
   return exists(join(scuriPath, "success.txt"));
 }
@@ -261,4 +327,8 @@ function mkDirIfNotExists(path: string) {
       return undefined;
     }
   });
+}
+
+function warnMeCompileTimeIfIMissAValue(v: never) {
+  throw new Error("You missed it!");
 }
