@@ -4,8 +4,9 @@ All notable changes to the "scuri-code" extension will be documented in this fil
 
 ## Versions
 
-1.0.2 Stop force showing the panel on every command [issue](https://github.com/gparlakov/scuri-code/issues/7)
+1.1.0 Add AutoSpy generation capability (limited - no path - user needs to copy the result to where they need it)
 
+1.0.2 Stop force showing the panel on every command [issue](https://github.com/gparlakov/scuri-code/issues/7)
 
 1.0.1 Fix [lodash vulnerability](https://github.com/lodash/lodash/pull/4336)
 

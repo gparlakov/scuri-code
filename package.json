@@ -1,6 +1,6 @@
 {
   "name": "scuri-code",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "displayName": "Scuri Code",
   "description": "Run Scuri from VS Code",
   "publisher": "gparlakov",
@@ -14,7 +14,8 @@
     "onCommand:scuri:generate",
     "onCommand:scuri:overwrite",
     "onCommand:scuri:update",
-    "onCommand:scuri:install-deps"
+    "onCommand:scuri:install-deps",
+    "onCommand:scuri:auto-spy"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -34,6 +35,10 @@
       {
         "command": "scuri:install-deps",
         "title": "SCuri Install Dependencies"
+      },
+      {
+        "command": "scuri:auto-spy",
+        "title": "SCuri Create autospy"
       }
     ]
   },
