@@ -117,7 +117,7 @@ function runScuriSchematic(activeFileName: string, root: string, channel: Output
       options ? options : ""
     }`
   );
-  channel.show();
+
   c.exec(
     `${schematicsExecutable} ${schematicsRelativePath}:spec --name ${activeFileName} ${
       options ? options : ""
@@ -196,7 +196,6 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
           // do not check if deps are installed because we might need to re-install (update!)
           .then(() => {
             return new Promise((res, rej) => {
-              channel.show();
               const key_installing = "scuri_deps_installing";
               if (context.globalState.get(key_installing)) {
                 const message = `Trying to install dependencies multiple times simultaneously.`;
