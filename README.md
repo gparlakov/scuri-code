@@ -4,13 +4,15 @@
 
 Allows running [SCURI](https://www.npmjs.com/package/scuri) ([github](https://github.com/gparlakov/scuri)) from the comfort of your beloved VS Code.
 
-![demo](./images/demo.gif)
+![demo](./images/demo-create.gif)
 
 ## Commands
 
 ### SCuri Create Spec
 
 Will generate a `.spec` file for the `.ts` file that is currently opened in the VS Code window
+
+![demo](./images/demo-create.gif)
 
 ### SCuri Create Spec (overwrite)
 
@@ -19,6 +21,8 @@ Will generate a `.spec` file for the `.ts` file that is currently opened in the 
 ### Scuri Update
 
 Will update the existing `.spec` file for the `.ts` file that is currently opened in the VS Code window
+
+![demo](./images/demo-update-standard-test.gif)
 
 ### Scuri Install Dependencies
 
