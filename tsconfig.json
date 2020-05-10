@@ -17,6 +17,7 @@
 	"exclude": [
 		"node_modules",
 		".vscode-test",
-		"./test.me*ts"
+		"./test.me*ts",
+		"testworkspace"
 	]
 }
