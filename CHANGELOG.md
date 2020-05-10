@@ -4,6 +4,11 @@ All notable changes to the "scuri-code" extension will be documented in this fil
 
 ## Versions
 
+## 1.2.0 2020.05.10 
+### Fixed
+- Support file system paths with spaces (i.e. users/g parlakov/projects/project1/src/app) 
+- Fix broken tests
+
 1.1.0 Add AutoSpy generation capability (limited - no path - user needs to copy the result to where they need it)
 
 1.0.2 Stop force showing the panel on every command [issue](https://github.com/gparlakov/scuri-code/issues/7)

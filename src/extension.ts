@@ -125,13 +125,13 @@ function runScuriSchematic(
   );
 
   channel.appendLine(
-    `${root}>${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name ${activeFileName} ${
+    `${root}>${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name "${activeFileName}" ${
       options ? options : ""
     }`
   );
 
   c.exec(
-    `${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name ${activeFileName} ${
+    `${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name "${activeFileName}" ${
       options ? options : ""
     }`,
     { cwd: root },
