@@ -4,6 +4,10 @@ All notable changes to the "scuri-code" extension will be documented in this fil
 
 ## Versions
 
+## 1.2.1 2020.05.10 
+### Fixed
+- Support file system paths with spaces (i.e. users/g parlakov/projects/project1/src/app) 
+
 ## 1.2.0 2020.05.10 
 ### Fixed
 - Support file system paths with spaces (i.e. users/g parlakov/projects/project1/src/app) 

@@ -131,7 +131,7 @@ function runScuriSchematic(
   );
 
   c.exec(
-    `${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name "${activeFileName}" ${
+    `"${schematicsExecutable}" "${schematicsRelativePath}:${schematic}" --name "${activeFileName}" ${
       options ? options : ""
     }`,
     { cwd: root },
