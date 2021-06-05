@@ -1,4 +1,5 @@
 # scuri-code README
+Like Scuri code? Want to [💸support it](#support-scuri-code)?
 
 ## Features
 
@@ -34,3 +35,8 @@ It needs to install npm packages `scuri` and `@angular-devkit/schematics-cli`. J
 
 ## Known Issues
  - not showing progress on commands Create or Update
+
+## Support scuri code
+
+<a href="https://www.buymeacoffee.com/bHQk8Cu" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-green.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
+
