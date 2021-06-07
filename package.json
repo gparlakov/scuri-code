@@ -52,17 +52,23 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-conventional": "^12.1.4",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.6",
     "@types/node": "^10.12.21",
     "@types/vscode": "^1.36.0",
     "@types/webpack": "4.1.4",
     "glob": "^7.1.4",
+    "husky": "^6.0.0",
     "lodash": "^4.17.21",
     "mocha": "^6.1.4",
+    "semantic-release": "^17.4.3",
+    "semantic-release-vsce": "^3.3.0",
     "ts-loader": "^6.0.4",
     "tslint": "^5.12.1",
     "typescript": "^3.3.1",
+    "vsce": "^1.92.0",
     "vscode-test": "^1.0.0-next.0",
     "webpack": "^4.35.2",
     "webpack-cli": "^3.3.5"
@@ -74,5 +80,32 @@
   "prettier": {
     "printWidth": 110,
     "singleQuote": true
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "semantic-release-vsce"
+    ],
+    "verifyConditions": [
+      "semantic-release-vsce",
+      "@semantic-release/github"
+    ],
+    "prepare": {
+      "path": "semantic-release-vsce",
+      "packageVsix": true
+    },
+    "publish": [
+      "semantic-release-vsce",
+      {
+        "path": "@semantic-release/github",
+        "assets": "*.vsix"
+      }
+    ]
   }
 }
