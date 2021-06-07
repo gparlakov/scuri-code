@@ -190,7 +190,7 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
   // check the folder
   return window.withProgress(
     {
-      location: ProgressLocation.Notification,
+      location: ProgressLocation.SourceControl,
       title: "Installing deps",
       cancellable: true
     },
