@@ -11,8 +11,6 @@ jobs:
       DISPLAY: :99
       VSCE_PAT: ${{ secrets.VSCE_PAT }}
     steps:
-      - name: Env
-        run: env
       - name: Checkout
         uses: actions/checkout@v2
         with:
