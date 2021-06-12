@@ -5,6 +5,9 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-18.04
+    env:
+      DISPLAY: :0
+      ELECTRON_ENABLE_LOGGING: true
     steps:
       - name: Checkout
         uses: actions/checkout@v2
