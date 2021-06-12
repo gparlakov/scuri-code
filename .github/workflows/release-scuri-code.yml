@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       DISPLAY: :99
+      VSCE_PAT: MARKETPLACE_TOKEN
     steps:
       - name: Checkout
         uses: actions/checkout@v2
