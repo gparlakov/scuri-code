@@ -14,7 +14,7 @@ async function main() {
 
     // const extensionTestsEnv = path.resolve(__dirname, './test-environment');
 
-    const testworkspace = path.resolve(__dirname, '../../testworkspace')
+    const testworkspace = path.resolve(__dirname, '../testworkspace');
 
     // Download VS Code, unzip it and run the integration test
     await runTests({
