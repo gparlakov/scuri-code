@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       DISPLAY: :99
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
     steps:
       - name: Env
         run: env
