@@ -4,6 +4,10 @@ All notable changes to the "scuri-code" extension will be documented in this fil
 
 ## Versions
 
+## [1.3.0] - 2021-06-12
+### Added
+-  improved error, success, and error messages
+
 ## [1.2.3] - 2020-09-01
 
 ### Fixed
