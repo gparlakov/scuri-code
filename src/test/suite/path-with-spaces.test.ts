@@ -13,7 +13,6 @@ suite('Extension Test Suite', () => {
         // 10 minutes - for downloading and installing the scuri npm package
         this.timeout(10 * 60 * 1000);
 
-
         return await vscode.commands.executeCommand("scuri:install-deps");
     });
 
