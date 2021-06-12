@@ -1,6 +1,9 @@
 name: Test scuri code
 on:
   pull_request
+  push:
+    branches:
+      - master
 jobs:
   test:
     name: Test
