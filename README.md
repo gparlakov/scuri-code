@@ -1,4 +1,6 @@
 # scuri-code README
+[![Release scuri code](https://github.com/gparlakov/scuri-code/actions/workflows/release-scuri-code.yml/badge.svg)](https://github.com/gparlakov/scuri-code/actions/workflows/release-scuri-code.yml) [![.github/workflows/test-scuri-code.yml](https://github.com/gparlakov/scuri-code/actions/workflows/test-scuri-code.yml/badge.svg?branch=master&event=pull_request)](https://github.com/gparlakov/scuri-code/actions/workflows/test-scuri-code.yml)
+
 Like Scuri code? Want to [💸support it](#support-scuri-code)?
 
 ## Features
