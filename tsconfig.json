@@ -18,6 +18,6 @@
 		"node_modules",
 		".vscode-test",
 		"./test.me*ts",
-		"testworkspace"
+		"**/testworkspace"
 	]
 }
