@@ -4,9 +4,11 @@ on:
     branches:
       - master
 jobs:
-  release:
-    name: Release
+    test:
+    name: Test
     runs-on: ubuntu-18.04
+    env:
+      DISPLAY: :99
     steps:
       - name: Checkout
         uses: actions/checkout@v2
