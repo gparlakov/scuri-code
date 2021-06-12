@@ -11,6 +11,8 @@ jobs:
       DISPLAY: :99
       VSCE_PAT: MARKETPLACE_TOKEN
     steps:
+      - name: Env
+        run: env
       - name: Checkout
         uses: actions/checkout@v2
         with:
