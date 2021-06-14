@@ -137,7 +137,7 @@ function runScuriSchematic(
         )
     )
     .then(([e, out, err]) => {
-      channel.appendLine('------------- Finished -------------')
+      channel.appendLine('------------- Finished -------------');
       if (err) {
         channel.appendLine(err);
       }
@@ -154,7 +154,7 @@ function runScuriSchematic(
           ? 'SCuri update successful!'
           : out;
 
-        window.showInformationMessage(success)
+        window.showInformationMessage(success);
         return out;
       }
 
@@ -213,11 +213,16 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
 
       return (
         // check/create if missing globalStorage/gparlakov.scuri-code
-        mkDirIfNotExists(context.globalStoragePath)
+        mkDirIfNotExists(context.globalStoragePath, channel)
           // check create if missing globalStorage/gparlakov.scuri-code/deps
-          .then(() => mkDirIfNotExists(scuriPath))
+          .then(() => mkDirIfNotExists(scuriPath, channel))
           // do not check if deps are installed because we might need to re-install (update!)
           .then(() => {
+            token.onCancellationRequested(() => {
+              console.log('User canceled the long running operation');
+              progress.report({ message: 'Canceled!' });
+            });
+
             return new Promise((res, rej) => {
               const key_installing = 'scuri_deps_installing';
               if (context.globalState.get(key_installing)) {
@@ -229,11 +234,12 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               }
 
               channel.appendLine(
-                'Start installing deps. Could take a couple of minutes - doing `npm install scuri @angular-devkit/schematics-cli`'
+                'Start installing deps. Could take a couple of minutes'
               );
+              channel.appendLine(`npm install scuri@latest @angular-devkit/schematics-cli@latest`);
 
               const proc = c.exec(
-                'npm i -S scuri @angular-devkit/schematics-cli && echo installed > success.txt',
+                'npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt',
                 {
                   cwd: scuriPath,
                   maxBuffer: 1000,
@@ -241,10 +247,10 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               );
 
               proc.stdout.on('data', (d) => {
-                console.log('stdout:', d);
+                channel.appendLine(d);
               });
               proc.stderr.on('data', (e) => {
-                console.log('stderr:', e);
+                channel.appendLine(e);
               });
 
               proc.on('exit', (code) => {
@@ -263,6 +269,7 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
           })
           .catch((e) => {
             channel.appendLine(e.message);
+            channel.appendLine(e.stack);
             console.error(`${e.message} ${e.stack}`);
           })
       );
@@ -328,13 +335,13 @@ function areDepsInstalled() {
   return exists(join(scuriPath, 'success.txt'));
 }
 
-function mkDirIfNotExists(path: string) {
+function mkDirIfNotExists(path: string, channel: OutputChannel) {
   return exists(path).then((e) => {
     if (!e) {
-      console.log(`${path} DOES NOT exist. Creating!`);
+      channel.appendLine(`${path} DOES NOT exist. Creating!`);
       return mkdir(path);
     } else {
-      console.log(`${path} exist`);
+      channel.appendLine(`${path} exist`);
       return undefined;
     }
   });
