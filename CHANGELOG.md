@@ -3,6 +3,10 @@
 All notable changes to the "scuri-code" extension will be documented in this file.
 
 ## Versions
+## [1.3.1] - 2021-06-14
+
+### Fixed
+-   stale versions update (especially on schematics cli) affects all instances of scuri-code on a system
 
 ## [1.3.0] - 2021-06-12
 ### Added
