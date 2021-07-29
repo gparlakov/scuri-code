@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { suiteSetup, test } from 'mocha';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import { Uri, workspace, commands, window  } from 'vscode';
+import { workspace, commands, window  } from 'vscode';
 import { cleanUpFiles } from './util/clean-up-files';
 const { executeCommand } = commands;
 

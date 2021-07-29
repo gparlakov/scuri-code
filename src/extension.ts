@@ -78,13 +78,15 @@ function scuriCommand(
         const a = window.activeTextEditor;
         // tslint:disable-next-line:triple-equals
         if (a != null && workspace.getWorkspaceFolder(a.document.uri) != null) {
-          const root = workspace.getWorkspaceFolder(a.document.uri);
+          const root = workspace.getWorkspaceFolder(a.document.uri)!;
+
           options = options || '';
           // need to add --debug false as the schematics engine assumes debug true when specifying the schematic by folder vs package name
           options += ' --debug false';
+
           return command(
-            workspace.asRelativePath(a.document.fileName),
-            root!.uri.fsPath,
+            workspace.asRelativePath(a.document.uri, false),
+            root.uri.fsPath,
             channel,
             options,
             schematic
@@ -233,9 +235,7 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
                 context.globalState.update(key_installing, true);
               }
 
-              channel.appendLine(
-                'Start installing deps. Could take a couple of minutes'
-              );
+              channel.appendLine('Start installing deps. Could take a couple of minutes');
               channel.appendLine(`npm install scuri@latest @angular-devkit/schematics-cli@latest`);
 
               const proc = c.exec(

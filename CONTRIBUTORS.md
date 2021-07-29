@@ -13,7 +13,7 @@ Scuri code is a VS Code [extension](https://marketplace.visualstudio.com/items?i
 - start a discussion in the [issues](https://github.com/gparlakov/scuri-code/issues)
 - fork the project [fork](https://github.com/gparlakov/scuri-code)
 - work in a branch `feature/my-awesome-feature-request`
-- open a PR and please add some tests for what you've experienced
+- open a PR and please add some tests for what you've experienced/corrected/added
 
 ## Testing
 Tests are using [mocha](https://mochajs.org/) and live inside `src/test` folder e.g. [src/test/path-with-spaces.test.ts](src/test/suite/path-with-spaces.test.ts)
