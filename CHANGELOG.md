@@ -3,6 +3,12 @@
 All notable changes to the "scuri-code" extension will be documented in this file.
 
 ## Versions
+## [1.4.0] - 2021-07-29
+
+### Fixed
+-   support multi-folder workspace
+
+
 ## [1.3.1] - 2021-06-14
 
 ### Fixed
