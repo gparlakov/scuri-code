@@ -11,6 +11,10 @@ variables:
   - name: DISPLAY
     value: :99
 steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: 14
+
   - script: sudo apt-get install -y xvfb
     displayName: Install xvfb virtual display
 
