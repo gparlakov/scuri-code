@@ -245,10 +245,12 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               );
 
               proc.stdout.on('data', (d) => {
-                channel.appendLine(d);
+                console.log('---------', d)
+                channel.appendLine(typeof d === 'string' ? d : JSON.parse(d));
               });
               proc.stderr.on('data', (e) => {
-                channel.appendLine(e);
+                console.error(e);
+                channel.appendLine(typeof e === 'string' ? e : JSON.parse(e));
               });
 
               proc.on('message', (m, s) => console.log('---------- "npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt" message and socker', m, s))
