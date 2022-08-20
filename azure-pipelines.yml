@@ -1,6 +1,10 @@
 name: Test scuri code
-on:
-  pull_request
+pr:
+    - master
+    - release/*
+trigger:
+    - master
+
 jobs:
   test:
     name: Test
