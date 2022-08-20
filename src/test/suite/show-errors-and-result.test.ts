@@ -3,6 +3,7 @@ import { suiteSetup, test } from 'mocha';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import { workspace, commands, window  } from 'vscode';
+import { activateIfNotActive } from './util/activate-if-not-active';
 import { cleanUpFiles } from './util/clean-up-files';
 const { executeCommand } = commands;
 
@@ -12,7 +13,7 @@ suite('Show errors', () => {
   suiteSetup(async function () {
     // 10 minutes - for downloading and installing the scuri npm package
     this.timeout(10 * 60 * 1000);
-
+    await activateIfNotActive();
     return await executeCommand('scuri:install-deps');
   });
 
@@ -28,9 +29,9 @@ suite('Show errors', () => {
   });
 
   // intermittently reports 'Nothing to be done'????
-  test.skip('should inform about created', async () => {
+  test('should inform about created', async () => {
     // arrange
-    await cleanUpFiles(folder.uri.path + '/example.spec.ts');
+    await cleanUpFiles();
     // open a file
     const example = await workspace.openTextDocument(folder.uri.path + '/example.ts');
     // and DON'T have it be the active editor

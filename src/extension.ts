@@ -10,8 +10,9 @@ import { commands, ExtensionContext, OutputChannel, ProgressLocation, window, wo
 
 const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
+const symlink = promisify(fs.symlink);
 
-let scuriPath: string;
+let depsPath: string;
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: ExtensionContext) {
@@ -19,7 +20,7 @@ export function activate(context: ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   const channel = window.createOutputChannel('SCuri');
   // init the path
-  scuriPath = join(context.globalStoragePath, 'deps');
+  depsPath = join(context.globalStoragePath, 'deps');
 
   // commands
   const generateCommand = commands.registerCommand(
@@ -67,11 +68,11 @@ function scuriCommand(
       .then((installed) =>
         !installed
           ? installDeps(channel, context).then(
-              () => '',
-              (v) => {
-                throw v;
-              }
-            )
+            () => '',
+            (v) => {
+              throw v;
+            }
+          )
           : ''
       )
       .then(() => {
@@ -107,16 +108,15 @@ function runScuriSchematic(
   options?: string,
   schematic: 'spec' | 'autospy' = 'spec'
 ): Thenable<string> {
-  const schematicsExecutable = join(scuriPath, 'node_modules', '.bin', 'schematics');
+  const schematicsExecutable = join(depsPath, 'node_modules', '.bin', 'schematics');
   // needs to be relative because c: will trip the schematics engine to take everything after the colon and treat it as the name of the schematics - think scuri:spec -> c:\programfiles
   const schematicsRelativePath = relative(
     root,
-    join(scuriPath, 'node_modules', 'scuri', 'src', 'collection.json')
+    join(depsPath, 'node_modules', 'scuri', 'src', 'collection.json')
   );
 
   channel.appendLine(
-    `${root}>${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name "${activeFileName}" ${
-      options ? options : ''
+    `${root}>${schematicsExecutable} ${schematicsRelativePath}:${schematic} --name "${activeFileName}" ${options ? options : ''
     }`
   );
 
@@ -126,8 +126,7 @@ function runScuriSchematic(
       (progress, _) =>
         new Promise<[c.ExecException | null, string, string]>((res, rej) =>
           c.exec(
-            `"${schematicsExecutable}" "${schematicsRelativePath}:${schematic}" --name "${activeFileName}" ${
-              options ? options : ''
+            `"${schematicsExecutable}" "${schematicsRelativePath}:${schematic}" --name "${activeFileName}" ${options ? options : ''
             }`,
             { cwd: root },
             // child process output handler
@@ -151,10 +150,10 @@ function runScuriSchematic(
         const success = out.includes('Nothing to be done.')
           ? 'SCuri found nothing to do!'
           : out.match(/create/i)
-          ? 'SCuri create successful!'
-          : out.match(/update/i)
-          ? 'SCuri update successful!'
-          : out;
+            ? 'SCuri create successful!'
+            : out.match(/update/i)
+              ? 'SCuri update successful!'
+              : out;
 
         window.showInformationMessage(success);
         return out;
@@ -179,8 +178,7 @@ function runScuriSchematic(
         message = 'A merge conflicted on path';
       } else {
         console.log(
-          `---------------- Could not run ${e?.cmd} ${EOL}------ with error: ${e?.message} ${EOL}${
-            e?.stack && !e?.message.includes(e?.stack) ? '------  with stack' + e.stack : ''
+          `---------------- Could not run ${e?.cmd} ${EOL}------ with error: ${e?.message} ${EOL}${e?.stack && !e?.message.includes(e?.stack) ? '------  with stack' + e.stack : ''
           }`
         );
         message = 'Could not run Scuri command.';
@@ -209,7 +207,7 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
     },
     (progress, token) => {
       token.onCancellationRequested(() => {
-        console.log('User canceled the long running operation');
+        console.log('------------User canceled the long running operation');
         progress.report({ message: 'Canceled!' });
       });
 
@@ -217,11 +215,11 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
         // check/create if missing globalStorage/gparlakov.scuri-code
         mkDirIfNotExists(context.globalStoragePath, channel)
           // check create if missing globalStorage/gparlakov.scuri-code/deps
-          .then(() => mkDirIfNotExists(scuriPath, channel))
+          .then(() => mkDirIfNotExists(depsPath, channel))
           // do not check if deps are installed because we might need to re-install (update!)
           .then(() => {
             token.onCancellationRequested(() => {
-              console.log('User canceled the long running operation');
+              console.log('------------User canceled the long running operation');
               progress.report({ message: 'Canceled!' });
             });
 
@@ -241,24 +239,27 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               const proc = c.exec(
                 'npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt',
                 {
-                  cwd: scuriPath,
+                  cwd: depsPath,
                   maxBuffer: 1000,
                 }
               );
 
               proc.stdout.on('data', (d) => {
-                channel.appendLine(d);
+                console.log('---------', d)
+                channel.appendLine(typeof d === 'string' ? d : JSON.parse(d));
               });
               proc.stderr.on('data', (e) => {
-                channel.appendLine(e);
+                console.error(e);
+                channel.appendLine(typeof e === 'string' ? e : JSON.parse(e));
               });
 
-              proc.on('exit', (code) => {
-                console.log('exit with', code);
+              proc.on('message', (m, s) => console.log('---------- "npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt" message and socker', m, s))
+              proc.on('exit', (code, signal) => {
+                console.log('------------ "npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt" exit with', code, 'signal?', signal);
                 // finished with installing deps
                 context.globalState.update(key_installing, undefined);
                 if (code === 0) {
-                  channel.appendLine(`Successfully installed SCuri dependencies in ${scuriPath}`);
+                  channel.appendLine(`Successfully installed SCuri dependencies in ${depsPath}`);
                   res('Done');
                 } else {
                   channel.appendLine('Failure installing deps');
@@ -267,10 +268,15 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               });
             });
           })
+          .then(() => mkLinkIfSrcNotExists(`${depsPath}/node_modules/scuri`, channel))
           .catch((e) => {
             channel.appendLine(e.message);
             channel.appendLine(e.stack);
-            console.error(`${e.message} ${e.stack}`);
+            if ('message' in e) {
+              console.error(`${e.message} ${e.stack}`);
+            } else {
+              console.log(e);
+            }
           })
       );
     }
@@ -332,16 +338,20 @@ function takeAutospyArguments(context: ExtensionContext, channel: OutputChannel)
 }
 
 function areDepsInstalled() {
-  return exists(join(scuriPath, 'success.txt'));
+  return exists(join(depsPath, 'success.txt'));
 }
 
 function mkDirIfNotExists(path: string, channel: OutputChannel) {
   return exists(path).then((e) => {
     if (!e) {
       channel.appendLine(`${path} DOES NOT exist. Creating!`);
-      return mkdir(path);
+      console.log(`${path} DOES NOT exist. Creating!`);
+      return mkdir(path)
+        .then(() => console.log('------------created!'))
+        .catch(e => console.error('could not create', e));
     } else {
       channel.appendLine(`${path} exist`);
+      console.log(`${path} exist`);
       return undefined;
     }
   });
@@ -353,4 +363,22 @@ function warnMeCompileTimeIfIMissAValue(v: never) {
 
 function wait(millis: number): Promise<void> {
   return new Promise((res) => setTimeout(res, millis));
+}
+
+async function mkLinkIfSrcNotExists(path: string, channel: OutputChannel) {
+  return exists(`${path}/src`)
+    .then((scrExists) => {
+      if (!scrExists) {
+        console.log(`${path} DOES NOT exist. linking with ${path}/dist!`);
+        channel.appendLine(`${path} DOES NOT exist. linking with ${path}/dist!`);
+        return symlink(`${path}/dist`, `${path}/src`, 'junction').then(() => {
+          console.log('------------Link src -> dist successfully created.');
+          channel.appendLine('Link src -> dist successfully created.');
+        })
+      } else {
+        console.log(`${path}/src exist, proceed with using it`);
+        channel.appendLine(`${path}/src exist, proceed with using it`);
+        return Promise.resolve();
+      }
+    });
 }

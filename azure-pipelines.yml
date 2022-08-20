@@ -1,19 +1,33 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
+name: Test scuri code
+pr:
+    - master
+    - release/*
 trigger:
-- master
-
+    - master
 pool:
-  vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'
 
+variables:
+  - name: DISPLAY
+    value: :99
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+  - task: NodeTool@0
+    inputs:
+      versionSpec: 14
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  - script: sudo apt-get install -y xvfb
+    displayName: Install xvfb virtual display
+
+  - script: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+    displayName: start virtual display
+  
+  - script: npm ci
+    displayName: Install dependencies
+
+  - script: npm run test
+    displayName: Test
+
+  - script: npm run vscode:prepublish
+    displayName: prepare for publish
+
+
