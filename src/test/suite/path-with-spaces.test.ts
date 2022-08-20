@@ -4,6 +4,7 @@ import { suiteSetup, test } from 'mocha';
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 import { Uri } from 'vscode';
+import { activateIfNotActive } from './util/activate-if-not-active';
 
 
 suite('Extension Test Suite', () => {
@@ -12,7 +13,7 @@ suite('Extension Test Suite', () => {
     suiteSetup(async function () {
         // 10 minutes - for downloading and installing the scuri npm package
         this.timeout(10 * 60 * 1000);
-
+        await activateIfNotActive();
         return await vscode.commands.executeCommand("scuri:install-deps");
     });
 
