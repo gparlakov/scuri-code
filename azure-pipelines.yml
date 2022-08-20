@@ -7,8 +7,9 @@ trigger:
 pool:
     vmImage: 'ubuntu-latest'
 
-env:
-  DISPLAY: :99
+variables:
+  - name: DISPLAY
+    value: :99
 steps:
   - name: Checkout
     uses: actions/checkout@v2
