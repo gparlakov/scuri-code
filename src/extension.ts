@@ -207,7 +207,7 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
     },
     (progress, token) => {
       token.onCancellationRequested(() => {
-        console.log('User canceled the long running operation');
+        console.log('------------User canceled the long running operation');
         progress.report({ message: 'Canceled!' });
       });
 
@@ -219,7 +219,7 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
           // do not check if deps are installed because we might need to re-install (update!)
           .then(() => {
             token.onCancellationRequested(() => {
-              console.log('User canceled the long running operation');
+              console.log('------------User canceled the long running operation');
               progress.report({ message: 'Canceled!' });
             });
 
@@ -251,8 +251,9 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
                 channel.appendLine(e);
               });
 
-              proc.on('exit', (code) => {
-                console.log('exit with', code);
+              proc.on('message', (m, s) => console.log('---------- "npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt" message and socker', m, s))
+              proc.on('exit', (code, signal) => {
+                console.log('------------ "npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt" exit with', code, 'signal?', signal);
                 // finished with installing deps
                 context.globalState.update(key_installing, undefined);
                 if (code === 0) {
@@ -269,7 +270,7 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
           .catch((e) => {
             channel.appendLine(e.message);
             channel.appendLine(e.stack);
-            if('message' in e) {
+            if ('message' in e) {
               console.error(`${e.message} ${e.stack}`);
             } else {
               console.log(e);
@@ -344,7 +345,7 @@ function mkDirIfNotExists(path: string, channel: OutputChannel) {
       channel.appendLine(`${path} DOES NOT exist. Creating!`);
       console.log(`${path} DOES NOT exist. Creating!`);
       return mkdir(path)
-        .then(() => console.log('created!'))
+        .then(() => console.log('------------created!'))
         .catch(e => console.error('could not create', e));
     } else {
       channel.appendLine(`${path} exist`);
@@ -369,7 +370,7 @@ async function mkLinkIfSrcNotExists(path: string, channel: OutputChannel) {
         console.log(`${path} DOES NOT exist. linking with ${path}/dist!`);
         channel.appendLine(`${path} DOES NOT exist. linking with ${path}/dist!`);
         return symlink(`${path}/dist`, `${path}/src`, 'junction').then(() => {
-          console.log('Link src -> dist successfully created.');
+          console.log('------------Link src -> dist successfully created.');
           channel.appendLine('Link src -> dist successfully created.');
         })
       } else {
