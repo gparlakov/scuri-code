@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 
 suite('Extension Test Suite', () => {
 	before(() => {
-		vscode.window.showInformationMessage('Start all tests.');
+		// vscode.window.showInformationMessage('Start all tests.');
 	});
 
 	test('activates successfully', async () => {

@@ -7,7 +7,7 @@ import { Uri } from 'vscode';
 import { activateIfNotActive } from './util/activate-if-not-active';
 
 
-suite('Extension Test Suite', () => {
+suite('Path with spaces tests', () => {
     const folder = vscode.workspace.workspaceFolders![0];
 
     suiteSetup(async function () {

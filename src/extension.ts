@@ -338,9 +338,13 @@ function mkDirIfNotExists(path: string, channel: OutputChannel) {
   return exists(path).then((e) => {
     if (!e) {
       channel.appendLine(`${path} DOES NOT exist. Creating!`);
-      return mkdir(path);
+      console.log(`${path} DOES NOT exist. Creating!`);
+      return mkdir(path)
+        .then(() => console.log('created!'))
+        .catch(e => console.error('could not create', e));
     } else {
       channel.appendLine(`${path} exist`);
+      console.log(`${path} exist`);
       return undefined;
     }
   });

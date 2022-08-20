@@ -7,7 +7,7 @@ import { Uri } from 'vscode';
 import { execSync } from 'child_process'
 import { cleanUpFiles } from './util/clean-up-files';
 
-suite('Install deps', () => {
+suite('Add synlink in deps', () => {
     const folder = vscode.workspace.workspaceFolders![0];
     suiteSetup(async function () {
         // wait up to 5 minutes - for downloading and installing the scuri npm package and scuri latest version again
@@ -19,7 +19,7 @@ suite('Install deps', () => {
         }
 
         // clear any preinstalled version of scuri from deps
-        execSync('rm -rf $HOME/.config/Code/User/globalStorage/gparlakov.scuri-code/deps/node_modules/scuri', { cwd: '/', encoding: 'utf8', stdio: 'ignore' })
+        console.log(execSync('rm -rf $HOME/.config/Code/User/globalStorage/gparlakov.scuri-code/deps/node_modules/scuri', { cwd: '/', encoding: 'utf8', stdio: 'ignore' }))
     })
 
     afterEach(cleanUpFiles)
