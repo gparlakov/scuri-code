@@ -4,7 +4,7 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     env:
       DISPLAY: :99
     steps:
@@ -26,4 +26,3 @@ jobs:
         run: npm run test
       - name: prepare for publish
         run: npm run vscode:prepublish
-
