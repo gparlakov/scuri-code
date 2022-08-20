@@ -269,7 +269,11 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
           .catch((e) => {
             channel.appendLine(e.message);
             channel.appendLine(e.stack);
-            console.error(`${e.message} ${e.stack}`);
+            if('message' in e) {
+              console.error(`${e.message} ${e.stack}`);
+            } else {
+              console.log(e);
+            }
           })
       );
     }

@@ -4,30 +4,28 @@ pr:
     - release/*
 trigger:
     - master
+pool:
+    vmImage: 'ubuntu-latest'
 
-jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-18.04
-    env:
-      DISPLAY: :99
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Install xvfb virtual display
-        run: sudo apt-get install -y xvfb
-      - name: start virtual display
-        run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - name: Install dependencies
-        run: npm ci
-      - name: Test
-        run: npm run test
-      - name: prepare for publish
-        run: npm run vscode:prepublish
+env:
+  DISPLAY: :99
+steps:
+  - name: Checkout
+    uses: actions/checkout@v2
+    with:
+      fetch-depth: 0
+  - name: Install xvfb virtual display
+    run: sudo apt-get install -y xvfb
+  - name: start virtual display
+    run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+  - name: Setup Node.js
+    uses: actions/setup-node@v1
+    with:
+      node-version: 12
+  - name: Install dependencies
+    run: npm ci
+  - name: Test
+    run: npm run test
+  - name: prepare for publish
+    run: npm run vscode:prepublish
 
