@@ -7,18 +7,28 @@ import { EOL } from 'os';
 import { join, relative } from 'path';
 import { promisify } from 'util';
 import { commands, ExtensionContext, OutputChannel, ProgressLocation, window, workspace } from 'vscode';
+import { scuriVersionConfig, schematicsCliVersion } from './types';
+
+type ScuriLogger = (message: string, o?: {
+  skipConsole?: boolean;
+  level: 'error' | 'log' | 'warn';
+}) => void;
 
 const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
 const symlink = promisify(fs.symlink);
 
-const createLogger = (channel: OutputChannel, consoleSeparator: string = '----------------') => (message: string, skipConsole?: boolean) => {
+const createLogger = (
+    channel: OutputChannel,
+    consoleSeparator: string = '----------------'
+): ScuriLogger  => (message, o) => {
   channel.appendLine(message);
-  if(!skipConsole) {
-    console.log(consoleSeparator, message);
+  if(!o?.skipConsole) {
+    console[o?.level ?? 'log'](consoleSeparator, message);
   }
 }
-let log: (message: string, skipConsole?: boolean) => void;
+
+let log: ScuriLogger;
 let depsPath: string;
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -227,6 +237,11 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               progress.report({ message: 'Canceled!' });
             });
 
+            const config = workspace.getConfiguration();
+            const scuriVersion = config.get(scuriVersionConfig);
+            const schematicsVersion = config.get(schematicsCliVersion)
+
+
             return new Promise((res, rej) => {
               const key_installing = 'scuri_deps_installing';
               if (context.globalState.get(key_installing)) {
@@ -238,10 +253,10 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               }
 
               channel.appendLine('Start installing deps. Could take a couple of minutes');
-              channel.appendLine(`npm install scuri@latest @angular-devkit/schematics-cli@latest`);
+              channel.appendLine(`npm install scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion}`);
 
               const proc = c.exec(
-                'npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt',
+                `npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} && echo installed > success.txt`,
                 {
                   cwd: depsPath,
                   maxBuffer: 1000,
@@ -249,17 +264,16 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               );
 
               proc.stdout.on('data', (d) => {
-                console.log('---------', d)
-                channel.appendLine(typeof d === 'string' ? d : JSON.parse(d));
+                log(typeof d === 'string' ? d : JSON.parse(d));
               });
               proc.stderr.on('data', (e) => {
                 console.error(e);
                 channel.appendLine(typeof e === 'string' ? e : JSON.parse(e));
               });
 
-              proc.on('message', (m, s) => console.log('---------- "npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt" message and socker', m, s))
+              proc.on('message', (m, s) => console.log(`---------- "npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} && echo installed > success.txt" message and success`, m, s))
               proc.on('exit', (code, signal) => {
-                console.log('------------ "npm i -S scuri@latest @angular-devkit/schematics-cli@latest && echo installed > success.txt" exit with', code, 'signal?', signal);
+                console.log(`------------ "npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} && echo installed > success.txt" exit with`, code, 'signal?', signal);
                 // finished with installing deps
                 context.globalState.update(key_installing, undefined);
                 if (code === 0) {
