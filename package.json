@@ -40,7 +40,22 @@
 				"command": "scuri:auto-spy",
 				"title": "SCuri Create autospy"
 			}
-		]
+		],
+		"configuration": {
+			"title": "Scuri Code",
+			"properties": {
+				"scuri-code.scuri-version": {
+					"type": "string",
+					"default": "latest",
+					"description": "What scuri version to use: 'latest' or 'next' or a specific '1.2.0'. Run command scuri:Install deps after changing this"
+				},
+				"scuri-code.angular-schematics-version": {
+					"type": "string",
+					"default": "latest",
+					"description": "What @angular-devkit/schematics-cli version to use: 'latest' or 'next' or a specific '1.2.0'. Run command scuri:Install deps after changing this"
+				}
+			}
+		}
 	},
 	"icon": "images/logo.png",
 	"scripts": {

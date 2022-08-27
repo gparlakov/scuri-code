@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { Uri } from 'vscode';
 import { execSync } from 'child_process'
 import { cleanUpFiles } from './util/clean-up-files';
+import { getCurrentInstalledVersion } from './util/get-current-installed-version';
 
 suite('Scuri-code', () => {
     const folder = vscode.workspace.workspaceFolders![0];
@@ -48,7 +49,7 @@ suite('Scuri-code', () => {
         // install older version of scuri
         console.log('------------', execSync('cd $HOME/.config/Code/User/globalStorage/gparlakov.scuri-code/deps && npm i scuri@1.1.0').toString('utf8'))
 
-        const version = execSync('cat $HOME/.config/Code/User/globalStorage/gparlakov.scuri-code/deps/node_modules/scuri/package.json | grep version').toString('utf8');
+        const version = getCurrentInstalledVersion();
         assert.strictEqual(true, version.includes('"version": "1.1.0"'));
 
         await vscode.commands.executeCommand("scuri:install-deps");
