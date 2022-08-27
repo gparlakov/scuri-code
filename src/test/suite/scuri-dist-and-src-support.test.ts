@@ -7,7 +7,7 @@ import { Uri } from 'vscode';
 import { execSync } from 'child_process'
 import { cleanUpFiles } from './util/clean-up-files';
 
-suite('Add synlink in deps', () => {
+suite('Scuri-code', () => {
     const folder = vscode.workspace.workspaceFolders![0];
     suiteSetup(async function () {
         // wait up to 5 minutes - for downloading and installing the scuri npm package and scuri latest version again
@@ -24,7 +24,7 @@ suite('Add synlink in deps', () => {
 
     afterEach(cleanUpFiles)
 
-    test('should create symlink src -> dist when installing latest version (1.2.0 and above)', async function test() {
+    test('should run install-deps and scuri:generate when installing latest version (1.2.0 and above) out of the box', async function test() {
 
         await vscode.commands.executeCommand("scuri:install-deps");
 
@@ -67,8 +67,8 @@ suite('Add synlink in deps', () => {
         const text = spec.getText();
         assert.strictEqual(true, text.includes("function setup()"));
     });
-    
-    test('should work as is for older version scuri (1.1.0 and below) which ships /src', async function () {
+
+    test('should as is for older version scuri (1.1.0 and below) which ships /src by adding a symlink /dist -> /src', async function () {
 
         // install older version of scuri
         console.log('------------', execSync('cd $HOME/.config/Code/User/globalStorage/gparlakov.scuri-code/deps && npm i scuri@1.1.0').toString('utf8'))
