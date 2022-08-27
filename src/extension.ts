@@ -12,6 +12,13 @@ const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
 const symlink = promisify(fs.symlink);
 
+const createLogger = (channel: OutputChannel, consoleSeparator: string = '----------------') => (message: string, skipConsole?: boolean) => {
+  channel.appendLine(message);
+  if(!skipConsole) {
+    console.log(consoleSeparator, message);
+  }
+}
+let log: (message: string, skipConsole?: boolean) => void;
 let depsPath: string;
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -21,6 +28,7 @@ export function activate(context: ExtensionContext) {
   const channel = window.createOutputChannel('SCuri');
   // init the path
   depsPath = join(context.globalStoragePath, 'deps');
+  log = createLogger(channel);
 
   // commands
   const generateCommand = commands.registerCommand(
@@ -65,16 +73,12 @@ function scuriCommand(
 ): () => Thenable<string> {
   return () => {
     return areDepsInstalled()
-      .then((installed) =>
-        !installed
-          ? installDeps(channel, context).then(
-            () => '',
-            (v) => {
-              throw v;
-            }
-          )
-          : ''
-      )
+      .then((installed) => {
+        if(!installed){
+          return installDeps(channel, context);
+        }
+        return mkLinkIfSrcNotExists(`${depsPath}/node_modules/scuri`, channel)
+      })
       .then(() => {
         const a = window.activeTextEditor;
         // tslint:disable-next-line:triple-equals
@@ -112,7 +116,7 @@ function runScuriSchematic(
   // needs to be relative because c: will trip the schematics engine to take everything after the colon and treat it as the name of the schematics - think scuri:spec -> c:\programfiles
   const schematicsRelativePath = relative(
     root,
-    join(depsPath, 'node_modules', 'scuri', 'src', 'collection.json')
+    join(depsPath, 'node_modules', 'scuri', 'dist', 'collection.json')
   );
 
   channel.appendLine(
@@ -124,7 +128,7 @@ function runScuriSchematic(
     .withProgress(
       { location: ProgressLocation.Notification, cancellable: false, title: 'Running Scuri command' },
       (progress, _) =>
-        new Promise<[c.ExecException | null, string, string]>((res, rej) =>
+        new Promise<[c.ExecException | null, string, string]>((res) =>
           c.exec(
             `"${schematicsExecutable}" "${schematicsRelativePath}:${schematic}" --name "${activeFileName}" ${options ? options : ''
             }`,
@@ -268,7 +272,6 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               });
             });
           })
-          .then(() => mkLinkIfSrcNotExists(`${depsPath}/node_modules/scuri`, channel))
           .catch((e) => {
             channel.appendLine(e.message);
             channel.appendLine(e.stack);
@@ -366,18 +369,15 @@ function wait(millis: number): Promise<void> {
 }
 
 async function mkLinkIfSrcNotExists(path: string, channel: OutputChannel) {
-  return exists(`${path}/src`)
+  return exists(`${path}/dist`)
     .then((scrExists) => {
       if (!scrExists) {
-        console.log(`${path} DOES NOT exist. linking with ${path}/dist!`);
-        channel.appendLine(`${path} DOES NOT exist. linking with ${path}/dist!`);
-        return symlink(`${path}/dist`, `${path}/src`, 'junction').then(() => {
-          console.log('------------Link src -> dist successfully created.');
-          channel.appendLine('Link src -> dist successfully created.');
+        log(`${scrExists} DOES NOT exist. linking with ${path}/src to support older versions of scuri!`);
+        return symlink(`${path}/src`, `${path}/dist`, 'junction').then(() => {
+          log('Link dist -> src successfully created.');
         })
       } else {
-        console.log(`${path}/src exist, proceed with using it`);
-        channel.appendLine(`${path}/src exist, proceed with using it`);
+        log(`${path}/dist exist, proceed with using it`);
         return Promise.resolve();
       }
     });
