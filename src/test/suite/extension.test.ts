@@ -30,7 +30,7 @@ suite('Extension Test Suite', () => {
 		const config = vscode.workspace.getConfiguration();
 		await config.update(scuriVersionConfig, '1.3.0-rc.6');
 		await config.update(schematicsCliVersion, '14.0.0');
-		await config.update(typescriptVersion, '4.7.2');
+		await config.update(typescriptVersion, '4.7.4');
 
         await vscode.commands.executeCommand("scuri:install-deps");
 
@@ -40,7 +40,7 @@ suite('Extension Test Suite', () => {
 		const schematicsCliVersionMatch = getCurrentInstalledVersion('@angular-devkit/schematics-cli').includes('14.0.0')
 		assert.strictEqual(true, schematicsCliVersionMatch);
 
-		const typescriptVersionMatch = getCurrentInstalledVersion('typescript').includes('4.7.2')
+		const typescriptVersionMatch = getCurrentInstalledVersion('typescript').includes('4.7.4')
 		assert.strictEqual(true, typescriptVersionMatch);
 	});
 });
