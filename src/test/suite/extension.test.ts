@@ -4,7 +4,7 @@ import { before } from 'mocha';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import { schematicsCliVersion, scuriVersionConfig } from '../../types';
+import { schematicsCliVersion, scuriVersionConfig, typescriptVersion } from '../../types';
 import { getCurrentInstalledVersion } from './util/get-current-installed-version';
 
 suite('Extension Test Suite', () => {
@@ -26,19 +26,21 @@ suite('Extension Test Suite', () => {
 		assert.strictEqual(true, s!.packageJSON.contributes.commands.length > 0);
 	});
 
-	test.only('install specified versions of scuri and angular schematics', async () => {
+	test('install specified versions of scuri and angular schematics', async () => {
 		const config = vscode.workspace.getConfiguration();
 		await config.update(scuriVersionConfig, '1.3.0-rc.6');
-		await config.update(schematicsCliVersion, '14.0.0')
+		await config.update(schematicsCliVersion, '14.0.0');
+		await config.update(typescriptVersion, '4.7.2');
 
         await vscode.commands.executeCommand("scuri:install-deps");
 
 		const scuriVersionMatch = getCurrentInstalledVersion('scuri').includes('1.3.0-rc.6')
-		assert.strictEqual(true, scuriVersionMatch)
+		assert.strictEqual(true, scuriVersionMatch);
 
 		const schematicsCliVersionMatch = getCurrentInstalledVersion('@angular-devkit/schematics-cli').includes('14.0.0')
-		assert.strictEqual(true, schematicsCliVersionMatch)
+		assert.strictEqual(true, schematicsCliVersionMatch);
 
-
-	})
+		const typescriptVersionMatch = getCurrentInstalledVersion('typescript').includes('4.7.2')
+		assert.strictEqual(true, typescriptVersionMatch);
+	});
 });

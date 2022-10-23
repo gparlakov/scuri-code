@@ -33,7 +33,13 @@ Will run `npm install --save-dev scuri @angular-devkit/schematics-cli` in the cu
 
 ## Requirements
 
-It needs to install npm packages `scuri` and `@angular-devkit/schematics-cli`. Just run the `Scuri Install Dependencies` command from the command pallette `F1`/`Ctrl + Shift + p` or any other command and it will do the trick
+It needs to install npm packages `scuri` and `@angular-devkit/schematics-cli` and `typescript`. Just run the `Scuri Install Dependencies` command from the command pallette `F1`/`Ctrl + Shift + p` or any other command and it will do the trick
+
+### Dependency Versions
+
+All `scuri`, `@angular-devkit/schematics-cli`, and `typescript` versions are configurable via the config: `scuri-code.scuri-version`,`scuri-code.angular-schematics-version`, `scuri-code.typescript-version`.
+
+
 
 ## Known Issues
  - not showing progress on commands Create or Update

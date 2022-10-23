@@ -7,7 +7,7 @@ import { EOL } from 'os';
 import { join, relative } from 'path';
 import { promisify } from 'util';
 import { commands, ExtensionContext, OutputChannel, ProgressLocation, window, workspace } from 'vscode';
-import { scuriVersionConfig, schematicsCliVersion } from './types';
+import { scuriVersionConfig, schematicsCliVersion, typescriptVersion as typescriptVersionConfig } from './types';
 
 type ScuriLogger = (message: string, o?: {
   skipConsole?: boolean;
@@ -239,7 +239,8 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
 
             const config = workspace.getConfiguration();
             const scuriVersion = config.get(scuriVersionConfig);
-            const schematicsVersion = config.get(schematicsCliVersion)
+            const schematicsVersion = config.get(schematicsCliVersion);
+            const typescriptVersion = config.get(typescriptVersionConfig);
 
 
             return new Promise((res, rej) => {
@@ -253,10 +254,10 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
               }
 
               channel.appendLine('Start installing deps. Could take a couple of minutes');
-              channel.appendLine(`npm install scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion}`);
+              channel.appendLine(`npm install scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} typescript@${typescriptVersion}`);
 
               const proc = c.exec(
-                `npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} && echo installed > success.txt`,
+                `npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} typescript@${typescriptVersion} && echo installed > success.txt`,
                 {
                   cwd: depsPath,
                   maxBuffer: 1000,
@@ -271,9 +272,9 @@ function installDeps(channel: OutputChannel, context?: ExtensionContext) {
                 channel.appendLine(typeof e === 'string' ? e : JSON.parse(e));
               });
 
-              proc.on('message', (m, s) => console.log(`---------- "npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} && echo installed > success.txt" message and success`, m, s))
+              proc.on('message', (m, s) => console.log(`---------- "npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} typescript@${typescriptVersion} && echo installed > success.txt" message and success`, m, s))
               proc.on('exit', (code, signal) => {
-                console.log(`------------ "npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} && echo installed > success.txt" exit with`, code, 'signal?', signal);
+                console.log(`------------ "npm i -S scuri@${scuriVersion} @angular-devkit/schematics-cli@${schematicsVersion} typescript@${typescriptVersion} && echo installed > success.txt" exit with`, code, 'signal?', signal);
                 // finished with installing deps
                 context.globalState.update(key_installing, undefined);
                 if (code === 0) {
