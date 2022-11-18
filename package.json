@@ -93,7 +93,7 @@
 		"vsce": "^2.10.2",
 		"vscode-test": "^1.5.2",
 		"webpack": "^4.35.2",
-		"webpack-cli": "^3.3.5"
+		"webpack-cli": "^3.3.12"
 	},
 	"repository": {
 		"type": "github",
