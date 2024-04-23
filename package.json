@@ -83,7 +83,7 @@
 		"glob": "^7.1.4",
 		"husky": "^6.0.0",
 		"lodash": "^4.17.21",
-		"mocha": "^6.1.4",
+		"mocha": "^6.2.3",
 		"rimraf": "^2.6.3",
 		"semantic-release": "^17.4.3",
 		"semantic-release-vsce": "^5.1.0",
